@@ -8,20 +8,20 @@ app.use(express.json());
 
 app.post('/v1/chat/completions', async (req, res) => {
     try {
-        // 打印原始请求信息
-        console.log(`接收到 POST 请求: ${req.method} ${req.originalUrl}`);
-        console.log('请求头:', req.headers);
-        console.log('原始请求体:', JSON.stringify(req.body));
+        // Log the original request information
+        console.log(`Received POST request: ${req.method} ${req.originalUrl}`);
+        console.log('Request headers:', req.headers);
+        console.log('Original request body:', JSON.stringify(req.body));
 
-        // 修改请求体
+        // Modify the request body
         const modifiedBody = {
             ...req.body,
             model: 'llama3.2-vision'
         };
         
-        console.log('修改后的请求体:', JSON.stringify(modifiedBody));
+        console.log('Modified request body:', JSON.stringify(modifiedBody));
 
-        // 转发到 12345 端口
+        // Forward to port 12344
         const response = await axios.post('http://localhost:12344/v1/chat/completions', modifiedBody, {
             headers: {
                 'Content-Type': 'application/json'
@@ -29,26 +29,26 @@ app.post('/v1/chat/completions', async (req, res) => {
             responseType: 'stream'
         });
 
-        // 设置响应头
+        // Set response headers
         res.setHeader('Content-Type', 'application/json');
 
-        // 创建可读流
+        // Create a readable stream
         const stream = new Readable().wrap(response.data);
 
-        // 将流式数据逐步返回给客户端
+        // Pipe the stream data back to the client
         stream.pipe(res);
     } catch (error) {
-        console.error('请求处理错误:', error);
-        res.status(500).json({ error: '请求处理失败', details: error.message });
+        console.error('Request handling error:', error);
+        res.status(500).json({ error: 'Request handling failed', details: error.message });
     }
 });
 
-// 错误处理中间件
+// Error handling middleware
 app.use((err, req, res, next) => {
-    console.error('服务器错误:', err);
-    res.status(500).json({ error: '服务器内部错误' });
+    console.error('Server error:', err);
+    res.status(500).json({ error: 'Internal server error' });
 });
 
 app.listen(3001, () => {
-    console.log('服务器正在运行： http://localhost:3001');
+    console.log('Server is running: http://localhost:3001');
 });
